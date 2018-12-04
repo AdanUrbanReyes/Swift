@@ -1,0 +1,112 @@
+import UIKit
+
+public class PostalCode{
+    
+    public var postalCode : String
+    public var city : String
+    public var municipio : String
+    public var asentamiento : String
+    
+    public init(postalCode : String, city : String, municipio : String, asentamiento : String) {
+        self.postalCode = postalCode
+        self.city = city
+        self.municipio = municipio
+        self.asentamiento = asentamiento
+    }
+
+    public func toString() -> String{
+        return "Codigo Postal : \(self.postalCode)\nCiudad : \(self.city)\nMunicipio : \(self.municipio)\nAsentamiento : \(self.asentamiento)"
+    }
+    
+}
+
+public class Address{
+    
+    public var streat : String
+    public var outsideNumber : Int16
+    public var insideNumber : Int8?
+    public var postalCode : PostalCode
+    
+    public init(streat : String, outsideNumber : Int16, insideNumber : Int8 = 0, postalCode : PostalCode){
+        self.streat = streat
+        self.outsideNumber = outsideNumber
+        self.insideNumber = insideNumber
+        self.postalCode = postalCode
+    }
+    
+    public func toString() -> String{
+        if let isn : Int8 = self.insideNumber{
+            return "Calle : \(self.streat)\nNumero Exterior : \(self.outsideNumber)\nNumero Interior : \(isn)\n" + self.postalCode.toString()
+        }else{
+            return "Calle : \(self.streat)\nNumero Exterior : \(self.outsideNumber)\n" + self.postalCode.toString()
+        }
+    }
+    
+}
+
+public enum Relative : String{
+    case FAMILY = "Family"
+    case WORK = "Work"
+    case GYM = "Gym"
+}
+
+public class Person{
+    
+    public var names : String
+    public var surname : String
+    public var age : Int8
+    public var email : String
+    public var address : Address
+    
+    public init(names : String, surname : String, email : String,birth : String, address : Address){
+        self.names = names
+        self.surname = surname
+        self.age = Person.getAge(birth: birth)
+        self.email = email
+        self.address = address
+    }
+    
+    public static func getAge(birth : String) -> Int8 {//29/12/1989
+        let df : DateFormatter = DateFormatter()
+        df.dateFormat = "dd/MM/yyyy"
+        return Int8(Calendar.current.dateComponents([.year], from: df.date(from: birth)!, to:Date()).year!)
+    }
+    
+    public func toString() -> String{
+        return "Nombres : \(self.names)\nApellidos : \(self.surname)\nEdad : \(self.age)\nCorreo Electronico : \(self.email)\n" + self.address.toString()
+    }
+    
+}
+
+public class Contacto : Person{
+    
+    public var company : String
+    public var relative : Relative
+    
+    public init(names : String, surname : String, email : String,birth : String, address : Address, company : String, relative : Relative){
+        self.company = company
+        self.relative = relative
+        super.init(names: names, surname: surname, email: email, birth: birth, address: address)
+    }
+    
+    public func toStringg() -> String{
+        return self.toString() + "\nEmpresa : \(self.company)\nParentesto : \(self.relative.rawValue)"
+    }
+}
+
+
+public class Event{
+    
+    public var title : String
+    public var start : Date
+    public var end : Date
+    public var description : String
+
+    public init(title : String, start : Date, end : Date, description : String = ""){
+        self.title = title
+        self.start = start
+        self.end = end
+        self.description = description
+    }
+    
+}
