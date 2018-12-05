@@ -13,7 +13,7 @@ public class PostalCode{
         self.municipio = municipio
         self.asentamiento = asentamiento
     }
-
+    
     public func toString() -> String{
         return "Codigo Postal : \(self.postalCode)\nCiudad : \(self.city)\nMunicipio : \(self.municipio)\nAsentamiento : \(self.asentamiento)"
     }
@@ -27,7 +27,13 @@ public class Address{
     public var insideNumber : Int8?
     public var postalCode : PostalCode
     
-    public init(streat : String, outsideNumber : Int16, insideNumber : Int8 = 0, postalCode : PostalCode){
+    public init(streat : String, outsideNumber : Int16, postalCode : PostalCode){
+        self.streat = streat
+        self.outsideNumber = outsideNumber
+        self.postalCode = postalCode
+    }
+    
+    public init(streat : String, outsideNumber : Int16, insideNumber : Int8, postalCode : PostalCode){
         self.streat = streat
         self.outsideNumber = outsideNumber
         self.insideNumber = insideNumber
@@ -35,8 +41,8 @@ public class Address{
     }
     
     public func toString() -> String{
-        if let isn : Int8 = self.insideNumber{
-            return "Calle : \(self.streat)\nNumero Exterior : \(self.outsideNumber)\nNumero Interior : \(isn)\n" + self.postalCode.toString()
+        if let ins : Int8 = self.insideNumber{
+            return "Calle : \(self.streat)\nNumero Exterior : \(self.outsideNumber)\nNumero Interior : \(ins)\n" + self.postalCode.toString()
         }else{
             return "Calle : \(self.streat)\nNumero Exterior : \(self.outsideNumber)\n" + self.postalCode.toString()
         }
@@ -45,9 +51,11 @@ public class Address{
 }
 
 public enum Relative : String{
-    case FAMILY = "Family"
-    case WORK = "Work"
-    case GYM = "Gym"
+    case FAMILY = "Familia"
+    case WORK = "Trabajo"
+    case GYM = "Gimnasio"
+    case SCHOOL = "Escuela"
+    case FRIEND = "Amigos"
 }
 
 public class Person{
@@ -57,6 +65,8 @@ public class Person{
     public var age : Int8
     public var email : String
     public var address : Address
+    public var contacts : Array<Contact>
+    public var events : Array<Event>
     
     public init(names : String, surname : String, email : String,birth : String, address : Address){
         self.names = names
@@ -64,12 +74,52 @@ public class Person{
         self.age = Person.getAge(birth: birth)
         self.email = email
         self.address = address
+        self.contacts = []
+        self.events = []
     }
     
-    public static func getAge(birth : String) -> Int8 {//29/12/1989
+    public static func getAge(birth : String) -> Int8 {
         let df : DateFormatter = DateFormatter()
         df.dateFormat = "dd/MM/yyyy"
         return Int8(Calendar.current.dateComponents([.year], from: df.date(from: birth)!, to:Date()).year!)
+    }
+    
+    public func addContact(contact : Contact) -> Void{
+        self.contacts.insert(contact, at : self.contacts.endIndex)
+    }
+    
+    public func addEvent(event : Event) -> Void{
+        self.events.insert(event, at: self.events.endIndex)
+    }
+
+    public func showContacts(){
+        Person.showContacts(contacts : self.contacts);
+    }
+    
+    public static func showContacts(contacts : Array<Contact>) -> Void {
+        for c in contacts{
+            print("----------------------------------------------------------------")
+            print (c.toString())
+        }
+        print("----------------------------------------------------------------")
+        print("Contactos : \(contacts.count)")
+    }
+    
+    public func showEvents(){
+        for e in self.events{
+            showEvent(event : e)
+        }
+        print("----------------------------------------------------------------")
+        print("Events : \(self.events.count)")
+    }
+    
+    public func showEvent(event : Event) -> Void{
+        print("----------------------------------------------------------------")
+        print (event.toString())
+    }
+    
+    public func getContacts(relative : Relative) -> Array<Contact>{
+        return self.contacts.filter { $0.relative == relative }
     }
     
     public func toString() -> String{
@@ -78,7 +128,7 @@ public class Person{
     
 }
 
-public class Contacto : Person{
+public class Contact : Person{
     
     public var company : String
     public var relative : Relative
@@ -89,8 +139,8 @@ public class Contacto : Person{
         super.init(names: names, surname: surname, email: email, birth: birth, address: address)
     }
     
-    public func toStringg() -> String{
-        return self.toString() + "\nEmpresa : \(self.company)\nParentesto : \(self.relative.rawValue)"
+    public override func toString() -> String{
+        return super.toString() + "\nEmpresa : \(self.company)\nParentesto : \(self.relative.rawValue)"
     }
 }
 
@@ -98,15 +148,126 @@ public class Contacto : Person{
 public class Event{
     
     public var title : String
-    public var start : Date
-    public var end : Date
+    public var start : String
+    public var end : String
     public var description : String
-
-    public init(title : String, start : Date, end : Date, description : String = ""){
+    public var contacts : Array<Contact>
+    
+    public init(title : String, start : String, end : String, description : String = ""){
         self.title = title
         self.start = start
         self.end = end
         self.description = description
+        self.contacts = []
+    }
+    
+    public func addContact(contact : Contact) -> Void {
+        self.contacts.insert(contact, at: self.contacts.endIndex)
+    }
+    
+    public func contactsToString() -> String{
+        var s : String = ""
+        for c in self.contacts {
+            s += "\(c.names) \(c.surname), "
+        }
+        return (s != "") ? "[\(s)]" : "No se han agregado contactos";
+    }
+    
+    public func toString() -> String{
+        //let df = DateFormatter()
+        //df.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return "Titulo : \(self.title)\nInicio : \(self.start)\nFin : \(self.end)\nDescripcion : \(self.description)\nContactos : \(self.contactsToString())"
     }
     
 }
+
+var ayanAlizitasAddress : Address = Address(streat : "Allende", outsideNumber  : 18, postalCode : PostalCode(postalCode : "54960", city: "Mexico", municipio : "Tultepec", asentamiento : "Barrio San Antonio el Cuadro"))
+
+var anasAddress : Address = Address(streat : "Paranagua", outsideNumber  : 221, postalCode : PostalCode(postalCode : "73400", city: "Mexico", municipio : "Zacatenco", asentamiento : "San Pedro"))
+
+var janethsAddress : Address = Address(streat : "Zapoteca", outsideNumber  : 31, insideNumber : 13, postalCode : PostalCode(postalCode : "42000", city: "Mexico", municipio : "Tlalpan", asentamiento : "La joya"))
+
+var ariatnasAddress : Address = Address(streat : "Manzanas", outsideNumber  : 116, insideNumber : 7, postalCode : PostalCode(postalCode : "21987", city: "Mexico", municipio : "Tultitlan", asentamiento : "El Dorado"))
+
+var alexasAddress : Address = Address(streat : "El cuadro", outsideNumber  : 76, postalCode : PostalCode(postalCode : "13711", city: "Mexico", municipio : "Coacalco", asentamiento : "Centro"))
+
+var andreasAddress : Address = Address(streat : "La loma", outsideNumber  : 21, postalCode : PostalCode(postalCode : "54932", city: "Mexico", municipio : "Tultepec", asentamiento : "San Martirn"))
+
+var ayan : Person = Person(names : "Ayan", surname : "Urban Reyes", email : "adanurbanreyes@gmail.com", birth: "29/12/1993", address : ayanAlizitasAddress);
+
+var alizita : Contact = Contact(names: "Alizita", surname : "Rios Palacios", email : "alizitariospalacios@gmail.com", birth : "12/09/1993", address : ayanAlizitasAddress, company : "AyaniAlizita", relative : Relative.FAMILY)
+
+var ana : Contact = Contact(names: "Ana", surname : "Contreras Lopez", email : "anacontreraslopez@gmail.com", birth : "11/09/1991", address : anasAddress, company : "Grupo Salinas", relative : Relative.WORK)
+
+var janet : Contact = Contact(names: "Janet", surname : "Cortes Henandez", email : "janethcorteshernandez@gmail.com", birth : "18/12/1993", address : janethsAddress, company : "DEISA", relative : Relative.GYM)
+
+var ariatna : Contact = Contact(names: "Ariatna", surname : "Rojas Trejo", email : "ariatnarojastrejo@gmail.com", birth : "21/05/1992", address : ariatnasAddress, company : "ESCOM", relative : Relative.SCHOOL)
+
+var alexa : Contact = Contact(names: "Alexa", surname : "Nicolas", email : "alexanicolas@gmail.com", birth : "30/01/1990", address : alexasAddress, company : "Biggest Fan", relative : Relative.FRIEND)
+
+var andrea : Contact = Contact(names: "Andrea", surname : "Solis Sandoval", email : "andreasolissandoval@gmail.com", birth : "12/03/1992", address : andreasAddress, company : "Modelo en Corona", relative : Relative.FRIEND)
+
+ayan.addContact(contact: alizita)
+ayan.addContact(contact: ana)
+ayan.addContact(contact: janet)
+ayan.addContact(contact: ariatna)
+ayan.addContact(contact: alexa)
+ayan.addContact(contact: andrea)
+
+//    public init(title : String, start : String, end : String, description : String = ""){
+
+var thanksgiving : Event = Event(title : "Thanksgiving", start : "22/11/2019 13:00:00", end : "22/11/2019 17:00:00", description : "Dia de gracias con la familia y amigos")
+
+
+var christmas : Event = Event(title : "Navidad", start : "24/11/2019 22:00:00", end : "25/11/2019 22:00:00", description : "Navidad en familia")
+
+
+var candelaria : Event = Event(title : "Candelaria", start : "22/02/2019 13:00:00", end : "22/02/2019 21:00:00", description : "Tamaliza")
+
+
+var dancing : Event = Event(title : "Baile de primavera", start : "29/04/2019 20:00:00", end : "29/04/2019 23:00:00", description : "Baile de primavera en la universidad")
+
+
+var conference : Event = Event(title : "Conferencia con Ana RC", start : "21/12/2018 17:00:00", end : "21/12/2018 18:00:00", description : "Platica con el personal de la aseguradora Ana RC para aclarar los puntos de activacion del seguro")
+
+for c in ayan.getContacts(relative: Relative.FAMILY)
+{
+    thanksgiving.addContact(contact: c)
+}
+
+for c in ayan.getContacts(relative: Relative.FRIEND)
+{
+    thanksgiving.addContact(contact: c)
+}
+
+for c in ayan.getContacts(relative: Relative.FAMILY)
+{
+    christmas.addContact(contact: c)
+}
+
+for c in ayan.getContacts(relative: Relative.FRIEND)
+{
+    candelaria.addContact(contact: c)
+}
+
+for c in ayan.getContacts(relative: Relative.SCHOOL)
+{
+    dancing.addContact(contact: c)
+}
+
+for c in ayan.getContacts(relative: Relative.WORK)
+{
+    conference.addContact(contact: c)
+}
+
+
+ayan.addEvent(event: thanksgiving)
+ayan.addEvent(event: christmas)
+ayan.addEvent(event: candelaria)
+ayan.addEvent(event: dancing)
+ayan.addEvent(event: conference)
+
+print(ayan.toString())
+print(ayan.showContacts())
+Person.showContacts(contacts : ayan.getContacts(relative: Relative.FRIEND))
+print(ayan.showEvents())
